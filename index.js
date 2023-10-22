@@ -10,10 +10,6 @@ app.use(cors());
 app.use(express.json());
 
 
-
-
-
-
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.ygdvtxa.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -41,7 +37,16 @@ async function run() {
         
     // })
 
+
+    // :::: ADDING PRODUCT AND GETTING PRODUCTS :::: 
+
     const productCollection = client.db('productDB').collection('product');
+    // ::: GETTING PRODUCTS :::
+    app.get('/product', async(req, res)=>{
+        const cursor = productCollection.find();
+        const result = await cursor.toArray();
+        res.send(result);
+    })
 
     // ::: ADDING PRODUCT IN SERVER SITE :::
     app.post('/product', async(req, res)=>{
@@ -50,6 +55,26 @@ async function run() {
         const result = await productCollection.insertOne(newProduct)
         res.send(result)
     })
+
+    // ::: ADDING MY CART PRODUCT AND GET PRODUCT :::
+
+    const myCartCollection = client.db('myCartDB').collection('myCart')
+    // GETTING CART PRODUCT :::
+    app.get('/myCart', async(req, res)=>{
+        const cursor = myCartCollection.find();
+        const result = await cursor.toArray();
+        res.send(result);
+    })
+    // ::: ADDING CART PRODUCT IN SERVER SITE :::
+    app.post('/myCart', async(req, res)=>{
+        const newCartProduct = req.body;
+        console.log(newCartProduct);
+        const result = await myCartCollection.insertOne(newCartProduct)
+    })
+
+
+
+
 
 
 
