@@ -24,7 +24,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
 
     // const userCollection = client.db('userDB').collection('user');
 
@@ -58,7 +58,7 @@ async function run() {
 
     // ::: ADDING MY CART PRODUCT AND GET PRODUCT :::
 
-    const myCartCollection = client.db('myCartDB').collection('myCart')
+    const myCartCollection = client.db('productDB').collection('myCart')
     // GETTING CART PRODUCT :::
     app.get('/myCart', async(req, res)=>{
         const cursor = myCartCollection.find();
@@ -70,6 +70,7 @@ async function run() {
         const newCartProduct = req.body;
         console.log(newCartProduct);
         const result = await myCartCollection.insertOne(newCartProduct)
+        res.send(result)
     })
 
     // ::: DELETING PRODUCT METHOD :::
@@ -81,6 +82,42 @@ async function run() {
     })
 
     // ::: UPDATE A SINGLE PRODUCT METHOD :::
+    app.get('/product/:id', async(req, res)=>{
+        const id = req.params.id;
+        const query = {_id: new ObjectId(id)}
+        const result = await productCollection.findOne(query)
+        res.send(result);
+    })
+    app.put('product/:id', async(req, res)=>{
+        const id = req.params.id;
+        const filter = {_id: new ObjectId(id)};
+        const options = {upsert: true};
+        const updateProduct = req.body;
+        const product = {
+            $set: {
+                productName: updateProduct.productName,
+                productImage: updateProduct.productImage,
+                brandName: updateProduct.brandName,
+                productType: updateProduct.productType,
+                productPrice: updateProduct.productPrice,
+                rating: updateProduct.rating,
+                productDescription: updateProduct.productDescription
+
+            }
+        }
+        const result = await productCollection.updateOne(filter, product, options)
+        res.send(result);
+    })
+
+    // ::: GET PRODUCT BRAND WISE :::
+    app.get("/brand/:brand", async(req, res)=>{
+        const {brand} = req.params;
+        const query = {brand: brand};
+        const result = await productCollection.find(query).toArray();
+        console.log(result);
+        res.send(result);
+    })
+
 
 
 
